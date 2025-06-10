@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Boule de Feu</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #222;
+        }
+        canvas {
+            display: block;
+            background-color: #000;
+        }
+        .health-bar {
+            position: absolute;
+            top: 10px;
+            height: 20px;
+            background-color: red;
+        }
+        #health1 {
+            left: 10px;
+            width: 200px;
+        }
+        #health2 {
+            right: 10px;
+            width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="health1" class="health-bar"></div>
+    <div id="health2" class="health-bar"></div>
+    <canvas id="gameCanvas"></canvas>
+    <script src="dist/game.js"></script>
+</body>
+</html>
