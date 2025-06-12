@@ -271,7 +271,7 @@
     <div class="fire-effect" id="fireEffect"></div>
         <div class="health-bars">
             <div class="control-text player1-controls">
-                <p><span>Z Q S D</span> + <span>C</span> pour tirer</p>
+                <p><span>Z Q S D</span> + <span>C</span> pour tirer + <span>Shift gauche</span> pour dash</p>
             </div>
             <div class="health-bar player1">
                 <div class="health-info">
@@ -293,7 +293,7 @@
                 </div>
             </div>
             <div class="control-text player2-controls">
-                <p><span>↑ ↓ ← →</span> + <span>0</span> pour tirer</p>
+                <p><span>↑ ↓ ← →</span> + <span>0</span> pour tirer + <span>1</span> pour dash</p>
             </div>
         </div>
         
@@ -303,7 +303,6 @@
 
 
     <script>
-        // Création des particules de feu en arrière-plan
         function createFireParticles() {
             const container = document.getElementById('fireEffect');
             const particleCount = 30;
@@ -312,13 +311,11 @@
                 const particle = document.createElement('div');
                 particle.classList.add('fire-particle');
                 
-                // Position aléatoire
                 const left = Math.random() * 100;
                 const bottom = Math.random() * 20;
                 particle.style.left = `${left}%`;
                 particle.style.bottom = `${bottom}%`;
                 
-                // Animation aléatoire
                 const duration = 2 + Math.random() * 3;
                 const delay = Math.random() * 5;
                 particle.style.animationDuration = `${duration}s`;
@@ -328,45 +325,54 @@
             }
         }
         
-        // Configuration du jeu
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Dimensions du jeu
         const gameWidth = canvas.width;
         const gameHeight = canvas.height;
         
-        // Personnages
         const player1 = {
             x: 150,
             y: gameHeight - 400,
             width: 75,
-            height: 75,
-            speed: 10,
+            height: 100,
+            speed: 7,
             health: 100,
             color: '#00ccff',
             lastFire: 0,
-            lastDirection: { dx: 0, dy: 0 } // Stocke la dernière direction
+            lastDirection: { dx: 0, dy: 0 },
+            canDash: true,
+            dashCooldown: 700,
+            dashDuration: 75,
+            dashSpeed: 50,
+            isDashing: false,
+            dashStartTime: 0,
+            lastDashTime: 0
         };
         
         const player2 = {
             x: gameWidth - 200,
             y: gameHeight - 400,
             width: 75,
-            height: 75,
-            speed: 10,
+            height: 100,
+            speed: 7,
             health: 100,
             color: '#ff6666',
             lastFire: 0,
-            lastDirection: { dx: 0, dy: 0 } // Stocke la dernière direction
+            lastDirection: { dx: 0, dy: 0 },
+            canDash: true,
+            dashCooldown: 700,
+            dashDuration: 75,
+            dashSpeed: 50,
+            isDashing: false,
+            dashStartTime: 0,
+            lastDashTime: 0
         };
         
-        // Boules de feu
         const fireballs = [];
         const fireballRadius = 15;
         const fireballSpeed = 30;
         
-        // État des touches
         const keys = {
             ArrowUp: false,
             ArrowDown: false,
@@ -377,10 +383,11 @@
             KeyA: false,
             KeyD: false,
             KeyC: false,
-            Numpad0: false
+            Numpad0: false,
+            ShiftLeft: false,
+            Numpad1: false 
         };
         
-        // Gestionnaires d'événements
         window.addEventListener('keydown', (e) => {
             if (keys.hasOwnProperty(e.code)) {
                 keys[e.code] = true;
@@ -399,11 +406,9 @@
             const minDistance = (player1.width + player2.width) / 2;
             
             if (distance < minDistance) {
-                // Calculer l'angle de collision
                 const angle = Math.atan2(dy, dx);
-                const force = 10; // Force de repoussement
+                const force = 10;
                 
-                // Repousser les joueurs
                 const moveX = Math.cos(angle) * force;
                 const moveY = Math.sin(angle) * force;
                 
@@ -412,82 +417,155 @@
                 player2.x -= moveX;
                 player2.y -= moveY;
                 
-                // Garder les joueurs dans les limites du canvas
                 player1.x = Math.max(0, Math.min(gameWidth - player1.width, player1.x));
                 player1.y = Math.max(0, Math.min(gameHeight - player1.height, player1.y));
                 player2.x = Math.max(0, Math.min(gameWidth - player2.width, player2.x));
                 player2.y = Math.max(0, Math.min(gameHeight - player2.height, player2.y));
             }
         }
+        function createDashParticles(player) {
+            const count = 15;
+            for (let i = 0; i < count; i++) {
+                playerParticles.push({
+                    x: player.x + player.width/2,
+                    y: player.y + player.height/2,
+                    size: Math.random() * 4 + 2,
+                    color: player.color,
+                    life: 20,
+                    speedX: (Math.random() - 0.5) * 15,
+                    speedY: (Math.random() - 0.5) * 15
+                });
+            }
+        }
+        const playerParticles = [];
+
+        function createPlayerParticles(player) {
+            const count = Math.random() > 0.7 ? 1 : 0;
+            for (let i = 0; i < count; i++) {
+                playerParticles.push({
+                    x: player.x + Math.random() * player.width,
+                    y: player.y + Math.random() * player.height,
+                    size: Math.random() * 3 + 1,
+                    color: player.color,
+                    life: 30
+                });
+            }
+        }
         
-        // Mettre à jour les positions
         function update() {
-            // Déplacement du joueur 1 (ZQSD)
-            if (keys.KeyW && player1.y > 0) {
-                player1.y -= player1.speed;
-                player1.lastDirection = { dx: 0, dy: -1 }; // Haut
-            }
-            if (keys.KeyS && player1.y < gameHeight - player1.height) {
-                player1.y += player1.speed;
-                player1.lastDirection = { dx: 0, dy: 1 }; // Bas
-            }
-            if (keys.KeyA && player1.x > 0) {
-                player1.x -= player1.speed;
-                player1.lastDirection = { dx: -1, dy: 0 }; // Gauche
-            }
-            if (keys.KeyD && player1.x < gameWidth - player1.width) {
-                player1.x += player1.speed;
-                player1.lastDirection = { dx: 1, dy: 0 }; // Droite
+            currentTime = Date.now();
+        
+            if (keys.ShiftLeft && player1.canDash && !player1.isDashing && 
+                currentTime - player1.lastDashTime > player1.dashCooldown) {
+                player1.isDashing = true;
+                player1.dashStartTime = currentTime;
+                player1.lastDashTime = currentTime;
+                createDashParticles(player1);
             }
             
-            // Déplacement du joueur 2 (Flèches)
-            if (keys.ArrowUp && player2.y > 0) {
-                player2.y -= player2.speed;
-                player2.lastDirection = { dx: 0, dy: -1 }; // Haut
+            if (player1.isDashing) {
+                if (currentTime - player1.dashStartTime < player1.dashDuration) {
+                    const dx = player1.lastDirection.dx * player1.dashSpeed;
+                    const dy = player1.lastDirection.dy * player1.dashSpeed;
+                    
+                    player1.x += dx;
+                    player1.y += dy;
+                    
+                    player1.x = Math.max(0, Math.min(gameWidth - player1.width, player1.x));
+                    player1.y = Math.max(0, Math.min(gameHeight - player1.height, player1.y));
+                    
+                    if (Math.random() > 0.5) {
+                        createDashParticles(player1);
+                    }
+                } else {
+                    player1.isDashing = false;
+                }
             }
-            if (keys.ArrowDown && player2.y < gameHeight - player2.height) {
-                player2.y += player2.speed;
-                player2.lastDirection = { dx: 0, dy: 1 }; // Bas
+            
+            if (keys.Numpad1 && player2.canDash && !player2.isDashing && 
+                currentTime - player2.lastDashTime > player2.dashCooldown) {
+                player2.isDashing = true;
+                player2.dashStartTime = currentTime;
+                player2.lastDashTime = currentTime;
+                createDashParticles(player2);
             }
-            if (keys.ArrowLeft && player2.x > 0) {
-                player2.x -= player2.speed;
-                player2.lastDirection = { dx: -1, dy: 0 }; // Gauche
+            
+            if (player2.isDashing) {
+                if (currentTime - player2.dashStartTime < player2.dashDuration) {
+                    const dx = player2.lastDirection.dx * player2.dashSpeed;
+                    const dy = player2.lastDirection.dy * player2.dashSpeed;
+                    
+                    player2.x += dx;
+                    player2.y += dy;
+                    
+                    player2.x = Math.max(0, Math.min(gameWidth - player2.width, player2.x));
+                    player2.y = Math.max(0, Math.min(gameHeight - player2.height, player2.y));
+                    
+                    if (Math.random() > 0.5) {
+                        createDashParticles(player2);
+                    }
+                } else {
+                    player2.isDashing = false;
+                }
             }
-            if (keys.ArrowRight && player2.x < gameWidth - player2.width) {
-                player2.x += player2.speed;
-                player2.lastDirection = { dx: 1, dy: 0 }; // Droite
+            if (!player1.isDashing) {
+                if (keys.KeyW && player1.y > 0) {
+                    player1.y -= player1.speed;
+                    player1.lastDirection = { dx: 0, dy: -1 };
+                }
+                if (keys.KeyS && player1.y < gameHeight - player1.height) {
+                    player1.y += player1.speed;
+                    player1.lastDirection = { dx: 0, dy: 1 };
+                }
+                if (keys.KeyA && player1.x > 0) {
+                    player1.x -= player1.speed;
+                    player1.lastDirection = { dx: -1, dy: 0 };
+                }
+                if (keys.KeyD && player1.x < gameWidth - player1.width) {
+                    player1.x += player1.speed;
+                    player1.lastDirection = { dx: 1, dy: 0 };
+                }
             }
-
+            if (!player2.isDashing) {
+                if (keys.ArrowUp && player2.y > 0) {
+                    player2.y -= player2.speed;
+                    player2.lastDirection = { dx: 0, dy: -1 };
+                }
+                if (keys.ArrowDown && player2.y < gameHeight - player2.height) {
+                    player2.y += player2.speed;
+                    player2.lastDirection = { dx: 0, dy: 1 };
+                }
+                if (keys.ArrowLeft && player2.x > 0) {
+                    player2.x -= player2.speed;
+                    player2.lastDirection = { dx: -1, dy: 0 };
+                }
+                if (keys.ArrowRight && player2.x < gameWidth - player2.width) {
+                    player2.x += player2.speed;
+                    player2.lastDirection = { dx: 1, dy: 0 };
+                }
+            }
             checkPlayerCollision();
             
-            // Gestion des tirs
-            const currentTime = Date.now();
-            
-            // Joueur 1 (touche F)
             if (keys.KeyC && currentTime - player1.lastFire > 500) {
                 createFireball(player1);
                 player1.lastFire = currentTime;
             }
             
-            // Joueur 2 (touche M)
             if (keys.Numpad0 && currentTime - player2.lastFire > 500) {
                 createFireball(player2);
                 player2.lastFire = currentTime;
             }
             
-            // Mettre à jour les boules de feu
             for (let i = fireballs.length - 1; i >= 0; i--) {
                 const fb = fireballs[i];
                 fb.x += fb.dx;
                 fb.y += fb.dy;
                 
-                // Vérifier les collisions avec les bords
                 if (fb.x < 0 || fb.x > gameWidth || fb.y < 0 || fb.y > gameHeight) {
                     fireballs.splice(i, 1);
                     continue;
                 }
                 
-                // Vérifier les collisions avec les joueurs
                 const targetPlayer = fb.player === player1 ? player2 : player1;
                 if (isColliding(fb, targetPlayer)) {
                     targetPlayer.health -= 20;
@@ -496,13 +574,17 @@
                     
                 }
             }
+            for (let i = playerParticles.length - 1; i >= 0; i--) {
+                const p = playerParticles[i];
+                p.life--;
+                if (p.life <= 0) {
+                    playerParticles.splice(i, 1);
+                }
+            }
         }
         
-        // Créer une boule de feu
         function createFireball(player) {
-            // Vérifier si une direction est définie
             if (player.lastDirection.dx === 0 && player.lastDirection.dy === 0) {
-                // Si aucune direction n'est définie, utiliser une direction par défaut
                 player.lastDirection = { dx: player === player1 ? 1 : -1, dy: 0 };
             }
             
@@ -517,7 +599,6 @@
             });
         }
         
-        // Vérifier les collisions
         function isColliding(fireball, player) {
             return fireball.x > player.x && 
                    fireball.x < player.x + player.width &&
@@ -525,14 +606,12 @@
                    fireball.y < player.y + player.height;
         }
         
-        // Mettre à jour les barres de vie
         function updateHealthBars() {
             document.getElementById('health1').textContent = `${player1.health}%`;
             document.getElementById('bar1').style.width = `${player1.health}%`;
             document.getElementById('health2').textContent = `${player2.health}%`;
             document.getElementById('bar2').style.width = `${player2.health}%`;
             
-            // Vérifier si un joueur a gagné
             if (player1.health <= 0 || player2.health <= 0) {
                 const winner = player1.health > player2.health ? "Joueur 1 (Bleu)" : "Joueur 2 (Rouge)";
                 setTimeout(() => {
@@ -542,7 +621,6 @@
             }
         }
         
-        // Réinitialiser le jeu
         function resetGame(nbr) {
             player1.x = 150;
             player1.y = gameHeight - 400;
@@ -562,24 +640,26 @@
             }
         }
         
-        // Dessiner les éléments
         function render() {
-            // Effacer l'écran
             ctx.clearRect(0, 0, gameWidth, gameHeight);
+            playerParticles.forEach(p => {
+                ctx.globalAlpha = p.life / 30;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            ctx.globalAlpha = 1;
             
-            // Dessiner le sol
             ctx.fillStyle = '#333';
             ctx.fillRect(0, gameHeight - 20, gameWidth, 20);
             
-            // Dessiner le joueur 1
             ctx.fillStyle = player1.color;
             ctx.fillRect(player1.x, player1.y, player1.width, player1.height);
             
-            // Dessiner le joueur 2
             ctx.fillStyle = player2.color;
             ctx.fillRect(player2.x, player2.y, player2.width, player2.height);
             
-            // Dessiner les boules de feu
             fireballs.forEach(fb => {
                 ctx.beginPath();
                 ctx.arc(fb.x, fb.y, fb.radius, 0, Math.PI * 2);
@@ -587,12 +667,10 @@
                 ctx.fill();
             });
             
-            // Dessiner la direction actuelle des joueurs (pour le debug)
             drawDirectionIndicator(player1);
             drawDirectionIndicator(player2);
         }
         
-        // Dessiner un indicateur de direction
         function drawDirectionIndicator(player) {
             const indicatorLength = 50;
             const centerX = player.x + player.width/2;
@@ -603,16 +681,15 @@
                 ctx.moveTo(centerX, centerY);
                 ctx.lineTo(
                     centerX + player.lastDirection.dx * indicatorLength,
-                    centerY + player.lastDirection.dy * indicatorLength
+                    centerY + player.lastDirection.dy * indicatorLength *1.25
                 );
                 ctx.strokeStyle = player === player1 ? '#00ccff' : '#ff6666';
                 ctx.lineWidth = 3;
                 ctx.stroke();
                 
-                // Dessiner une flèche
                 const arrowSize = 15;
                 const endX = centerX + player.lastDirection.dx * indicatorLength;
-                const endY = centerY + player.lastDirection.dy * indicatorLength;
+                const endY = centerY + player.lastDirection.dy * indicatorLength*1.25;
                 
                 ctx.beginPath();
                 ctx.moveTo(endX, endY);
@@ -631,15 +708,14 @@
             }
         }
         
-        // Boucle de jeu
         function gameLoop() {
-            
+            createPlayerParticles(player1);
+            createPlayerParticles(player2);
             update();
             render();
             requestAnimationFrame(gameLoop);
         }
         
-        // Initialisation
         createFireParticles();
         updateHealthBars();
         gameLoop();
