@@ -1,9 +1,10 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Combat: Lanceur de Boules de Feu</title>
+    <title>Sélection des Maps et Couleurs</title>
     <style>
         * {
             margin: 0;
@@ -13,252 +14,330 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
-            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            padding: 20px;
-            color: white;
-            overflow-x: hidden;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 20%);
+            pointer-events: none;
         }
         
         .container {
-            max-width: 900px;
-            width: 100%;
+            background: rgba(22, 22, 36, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        header {
-            margin-bottom: 20px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                linear-gradient(45deg, transparent 48%, rgba(255, 255, 255, 0.05) 50%, transparent 52%),
+                linear-gradient(-45deg, transparent 48%, rgba(255, 255, 255, 0.05) 50%, transparent 52%);
+            background-size: 60px 60px;
+            z-index: -1;
+            animation: moveGrid 20s linear infinite;
+        }
+        
+        @keyframes moveGrid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
         }
         
         h1 {
+            color: white;
             font-size: 2.8rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 10px #ff6600, 0 0 20px #ff3300;
-            letter-spacing: 1.5px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+            position: relative;
+        }
+        
+        h1::after {
+            content: "";
+            display: block;
+            width: 150px;
+            height: 4px;
+            background: linear-gradient(to right, transparent, #ff8a00, transparent);
+            margin: 15px auto 0;
+            border-radius: 2px;
         }
         
         .subtitle {
+            color: rgba(255, 255, 255, 0.7);
             font-size: 1.2rem;
-            margin-bottom: 15px;
-            color: #ffcc00;
+            margin-bottom: 40px;
+            font-weight: 300;
         }
         
-        .game-area {
+        .maps-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .map-card {
+            width: 300px;
+            height: 200px;
+            border-radius: 15px;
+            overflow: hidden;
             position: relative;
-            margin: 0 auto 25px;
-            width: 1700px;
-            height: 750px;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 0 30px rgba(255, 100, 0, 0.7);
-            background: linear-gradient(to bottom, #2c3e50, #1c2833);
-            border: 3px solid #ff9900;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s ease, transform 0.3s ease;
+            border: 3px solid transparent;
         }
         
-        canvas {
-            display: block;
+        .map-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
         }
         
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 25px;
+        .map-card.selected {
+            border: 3px solid #ff8a00;
+            box-shadow: 0 0 25px rgba(255, 138, 0, 0.6);
         }
         
-        .player-controls {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 20px;
-            border-radius: 15px;
-            flex: 1;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 200, 0, 0.3);
-        }
-        
-        .player-controls h2 {
-            color: #ffcc00;
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-        }
-        
-        .controls-list {
-            text-align: left;
-            padding: 0 20px;
-        }
-        
-        .controls-list li {
-            margin: 10px 0;
-            font-size: 1.1rem;
-            color: #f0f0f0;
-        }
-        
-        .player1 .controls-list li span {
-            color: #00ccff;
-            font-weight: bold;
-        }
-        
-        .player2 .controls-list li span {
-            color: #ff6666;
-            font-weight: bold;
-        }
-        
-        .health-bars {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .health-bar {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 20px;
-            border-radius: 15px;
-            width: 48%;
-            min-width: 270px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 200, 0, 0.3);
-        }
-        
-        .health-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        
-        .health-label {
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-        
-        .player1 .health-label {
-            color: #00ccff;
-        }
-        
-        .player2 .health-label {
-            color: #ff6666;
-        }
-        
-        .health-value {
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-        
-        .bar-container {
-            height: 20px;
-            background: #333;
-            border-radius: 15px;
-            overflow: hidden;
+        .map-card .map-image {
             width: 100%;
-            border: 2px solid #444;
-        }
-        
-        .bar {
             height: 100%;
-            transition: width 0.3s ease;
-            max-width: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.5s ease;
         }
         
-        .player1 .bar {
-            background: linear-gradient(to right, #00aaff, #0066ff);
+        .map-card:hover .map-image {
+            transform: scale(1.1);
         }
         
-        .player2 .bar {
-            background: linear-gradient(to right, #ff5555, #ff0000);
-        }
-        
-        .instructions {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(0, 200, 255, 0.3);
-        }
-        
-        .instructions h2 {
-            color: #00cc99;
-            margin-bottom: 15px;
-            font-size: 1.6rem;
-        }
-        
-        .instructions p {
-            margin: 10px 0;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-        
-        .highlight {
-            color: #ffcc00;
-            font-weight: bold;
-        }
-        
-        .fire-effect {
+        .map-card .map-overlay {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
+            bottom: 0;
             left: 0;
-            pointer-events: none;
-            z-index: -1;
-            opacity: 0.2;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            text-align: left;
+            transform: translateY(70px);
+            transition: transform 0.3s ease;
         }
         
-        .fire-particle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: radial-gradient(#ff6600, #ff3300);
-            border-radius: 50%;
-            box-shadow: 0 0 15px #ff3300;
-            animation: float 3s infinite ease-in;
+        .map-card:hover .map-overlay {
+            transform: translateY(0);
         }
-        .control-text {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 15px 20px;
+        
+        .map-card .map-name {
+            color: white;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        #map1 .map-image {
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
+                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%233a5"/><path d="M0,100 Q150,50 300,100 L300,200 L0,200 Z" fill="%23284"/><circle cx="50" cy="50" r="15" fill="%23fc3"/><circle cx="250" cy="80" r="10" fill="%23fc3"/><circle cx="150" cy="120" r="8" fill="%23fc3"/></svg>');
+        }
+        
+        #map2 .map-image {
+            background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), 
+                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="%23a62"/><path d="M0,150 Q150,50 300,150 L300,200 L0,200 Z" fill="%23841"/><rect x="50" y="100" width="40" height="60" fill="%23aaf" rx="5"/><rect x="150" y="80" width="60" height="80" fill="%23aaf" rx="5"/><rect x="230" y="120" width="40" height="60" fill="%23aaf" rx="5"/></svg>');
+        }
+        
+        .color-selection {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .player-color {
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 15px;
-            min-width: 180px;
+            padding: 20px;
+            width: 48%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .player-color h3 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 200, 0, 0.3);
-            text-align: center;
-            font-size: 1rem;
+            gap: 10px;
+        }
+        
+        .player-color .color-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: currentColor;
+            box-shadow: 0 0 8px currentColor;
+        }
+        
+        .color-options {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+        }
+        
+        .color-option.selected {
+            transform: scale(1.15);
+            border: 3px solid white;
+            box-shadow: 0 0 15px currentColor;
+        }
+        
+        .play-btn {
+            background: linear-gradient(to right, #ff8a00, #da1b60);
+            color: white;
+            border: none;
+            padding: 18px 60px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 1px;
             font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .player1-controls span {
-            color: #00ccff;
-        }
-
-        .player2-controls span {
-            color: #ff6666;
-        }
-        
-        @keyframes float {
-            0% { transform: translateY(0) translateX(0); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 0.8; }
-            100% { transform: translateY(-100px) translateX(20px); opacity: 0; }
+        .play-btn.disabled {
+            background: linear-gradient(to right, #555, #777);
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
         }
         
-        @media (max-width: 850px) {
-            .game-area {
-                width: 95%;
-                height: 400px;
+        .play-btn:not(.disabled):hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(218, 27, 96, 0.6);
+        }
+        
+        .play-btn:not(.disabled):active {
+            transform: translateY(2px);
+        }
+        
+        .play-btn:not(.disabled)::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(30deg);
+            transition: all 0.6s ease;
+        }
+        
+        .play-btn:not(.disabled):hover::after {
+            transform: rotate(30deg) translate(20%, 100%);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(218, 27, 96, 0.9);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.4s ease;
+            z-index: 100;
+        }
+        
+        .notification.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .notification.warning {
+            background: rgba(255, 153, 0, 0.9);
+        }
+        
+        footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
             }
             
-            .controls {
+            .maps-container {
                 flex-direction: column;
+                align-items: center;
+            }
+            
+            .map-card {
+                width: 100%;
+                max-width: 350px;
+            }
+            
+            .color-selection {
+                flex-direction: column;
+            }
+            
+            .player-color {
+                width: 100%;
             }
             
             h1 {
@@ -268,457 +347,156 @@
     </style>
 </head>
 <body>
-    <div class="fire-effect" id="fireEffect"></div>
-        <div class="health-bars">
-            <div class="control-text player1-controls">
-                <p><span>Z Q S D</span> + <span>C</span> pour tirer + <span>Shift gauche</span> pour dash</p>
-            </div>
-            <div class="health-bar player1">
-                <div class="health-info">
-                    <div class="health-label">Joueur 1 (Bleu)</div>
-                    <div class="health-value" id="health1">100%</div>
-                </div>
-                <div class="bar-container">
-                    <div class="bar" id="bar1" style="width: 100%"></div>
+    <div class="container">
+        <h1>SÉLECTION DE LA MAP</h1>
+        <p class="subtitle">Choisissez votre terrain de jeu et les couleurs des joueurs</p>
+        
+        <div class="maps-container">
+            <div id="map1" class="map-card selected">
+                <div class="map-image"></div>
+                <div class="map-overlay">
+                    <div class="map-name">Forêt Enchantée</div>
                 </div>
             </div>
             
-            <div class="health-bar player2">
-                <div class="health-info">
-                    <div class="health-label">Joueur 2 (Rouge)</div>
-                    <div class="health-value" id="health2">100%</div>
+            <div id="map2" class="map-card">
+                <div class="map-image"></div>
+                <div class="map-overlay">
+                    <div class="map-name">Cité Futuriste</div>
                 </div>
-                <div class="bar-container">
-                    <div class="bar" id="bar2" style="width: 100%"></div>
-                </div>
-            </div>
-            <div class="control-text player2-controls">
-                <p><span>↑ ↓ ← →</span> + <span>0</span> pour tirer + <span>1</span> pour dash</p>
             </div>
         </div>
         
-        <div class="game-area">
-            <canvas id="gameCanvas" width="1700" height="750"></canvas>
+        <div class="color-selection">
+            <div class="player-color">
+                <h3><span class="color-indicator" id="player1Indicator" style="color: #00ccff;"></span> Joueur 1</h3>
+                <div class="color-options">
+                    <div class="color-option selected" style="background-color: #00ccff;" data-color="#00ccff" data-player="1"></div>
+                    <div class="color-option" style="background-color: #00ff00;" data-color="#00ff00" data-player="1"></div>
+                    <div class="color-option" style="background-color: #ffff00;" data-color="#ffff00" data-player="1"></div>
+                    <div class="color-option" style="background-color: #ff00ff;" data-color="#ff00ff" data-player="1"></div>
+                    <div class="color-option" style="background-color: #ff9900;" data-color="#ff9900" data-player="1"></div>
+                </div>
+            </div>
+            
+            <div class="player-color">
+                <h3><span class="color-indicator" id="player2Indicator" style="color: #ff6666;"></span> Joueur 2</h3>
+                <div class="color-options">
+                    <div class="color-option selected" style="background-color: #ff6666;" data-color="#ff6666" data-player="2"></div>
+                    <div class="color-option" style="background-color: #00ffff;" data-color="#00ffff" data-player="2"></div>
+                    <div class="color-option" style="background-color: #ffcc00;" data-color="#ffcc00" data-player="2"></div>
+                    <div class="color-option" style="background-color: #cc00ff;" data-color="#cc00ff" data-player="2"></div>
+                    <div class="color-option" style="background-color: #00ffcc;" data-color="#00ffcc" data-player="2"></div>
+                </div>
+            </div>
         </div>
-
-
+        
+        <button class="play-btn" id="playButton">JOUER MAINTENANT</button>
+    </div>
+    
+    <div class="notification" id="notification">Chargement de la map en cours...</div>
     <script>
-        function createFireParticles() {
-            const container = document.getElementById('fireEffect');
-            const particleCount = 30;
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('fire-particle');
-                
-                const left = Math.random() * 100;
-                const bottom = Math.random() * 20;
-                particle.style.left = `${left}%`;
-                particle.style.bottom = `${bottom}%`;
-                
-                const duration = 2 + Math.random() * 3;
-                const delay = Math.random() * 5;
-                particle.style.animationDuration = `${duration}s`;
-                particle.style.animationDelay = `${delay}s`;
-                
-                container.appendChild(particle);
+        const notification = document.getElementById('notification');
+        const playButton = document.getElementById('playButton');
+        const mapCards = document.querySelectorAll('.map-card');
+        const colorOptions = document.querySelectorAll('.color-option');
+        const player1Indicator = document.getElementById('player1Indicator');
+        const player2Indicator = document.getElementById('player2Indicator');
+        
+        let selectedPlayer1Color = '#00ccff';
+        let selectedPlayer2Color = '#ff6666';
+        
+        function updatePlayButtonState() {
+            const selectedMap = document.querySelector('.map-card.selected');
+            if (!selectedMap) {
+                playButton.classList.add('disabled');
+                playButton.disabled = true;
+            } else {
+                playButton.classList.remove('disabled');
+                playButton.disabled = false;
             }
         }
         
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+        updatePlayButtonState();
         
-        const gameWidth = canvas.width;
-        const gameHeight = canvas.height;
-        
-        const player1 = {
-            x: 150,
-            y: gameHeight - 400,
-            width: 75,
-            height: 100,
-            speed: 7,
-            health: 100,
-            color: '#00ccff',
-            lastFire: 0,
-            lastDirection: { dx: 0, dy: 0 },
-            canDash: true,
-            dashCooldown: 700,
-            dashDuration: 75,
-            dashSpeed: 50,
-            isDashing: false,
-            dashStartTime: 0,
-            lastDashTime: 0
-        };
-        
-        const player2 = {
-            x: gameWidth - 200,
-            y: gameHeight - 400,
-            width: 75,
-            height: 100,
-            speed: 7,
-            health: 100,
-            color: '#ff6666',
-            lastFire: 0,
-            lastDirection: { dx: 0, dy: 0 },
-            canDash: true,
-            dashCooldown: 700,
-            dashDuration: 75,
-            dashSpeed: 50,
-            isDashing: false,
-            dashStartTime: 0,
-            lastDashTime: 0
-        };
-        
-        const fireballs = [];
-        const fireballRadius = 15;
-        const fireballSpeed = 30;
-        
-        const keys = {
-            ArrowUp: false,
-            ArrowDown: false,
-            ArrowLeft: false,
-            ArrowRight: false,
-            KeyW: false,
-            KeyS: false,
-            KeyA: false,
-            KeyD: false,
-            KeyC: false,
-            Numpad0: false,
-            ShiftLeft: false,
-            Numpad1: false 
-        };
-        
-        window.addEventListener('keydown', (e) => {
-            if (keys.hasOwnProperty(e.code)) {
-                keys[e.code] = true;
-            }
-        });
-        
-        window.addEventListener('keyup', (e) => {
-            if (keys.hasOwnProperty(e.code)) {
-                keys[e.code] = false;
-            }
-        });
-        function checkPlayerCollision() {
-            const dx = player1.x - player2.x;
-            const dy = player1.y - player2.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const minDistance = (player1.width + player2.width) / 2;
-            
-            if (distance < minDistance) {
-                const angle = Math.atan2(dy, dx);
-                const force = 10;
-                
-                const moveX = Math.cos(angle) * force;
-                const moveY = Math.sin(angle) * force;
-                
-                player1.x += moveX;
-                player1.y += moveY;
-                player2.x -= moveX;
-                player2.y -= moveY;
-                
-                player1.x = Math.max(0, Math.min(gameWidth - player1.width, player1.x));
-                player1.y = Math.max(0, Math.min(gameHeight - player1.height, player1.y));
-                player2.x = Math.max(0, Math.min(gameWidth - player2.width, player2.x));
-                player2.y = Math.max(0, Math.min(gameHeight - player2.height, player2.y));
-            }
-        }
-        function createDashParticles(player) {
-            const count = 15;
-            for (let i = 0; i < count; i++) {
-                playerParticles.push({
-                    x: player.x + player.width/2,
-                    y: player.y + player.height/2,
-                    size: Math.random() * 4 + 2,
-                    color: player.color,
-                    life: 20,
-                    speedX: (Math.random() - 0.5) * 15,
-                    speedY: (Math.random() - 0.5) * 15
-                });
-            }
-        }
-        const playerParticles = [];
-
-        function createPlayerParticles(player) {
-            const count = Math.random() > 0.7 ? 1 : 0;
-            for (let i = 0; i < count; i++) {
-                playerParticles.push({
-                    x: player.x + Math.random() * player.width,
-                    y: player.y + Math.random() * player.height,
-                    size: Math.random() * 3 + 1,
-                    color: player.color,
-                    life: 30
-                });
-            }
-        }
-        
-        function update() {
-            currentTime = Date.now();
-        
-            if (keys.ShiftLeft && player1.canDash && !player1.isDashing && 
-                currentTime - player1.lastDashTime > player1.dashCooldown) {
-                player1.isDashing = true;
-                player1.dashStartTime = currentTime;
-                player1.lastDashTime = currentTime;
-                createDashParticles(player1);
-            }
-            
-            if (player1.isDashing) {
-                if (currentTime - player1.dashStartTime < player1.dashDuration) {
-                    const dx = player1.lastDirection.dx * player1.dashSpeed;
-                    const dy = player1.lastDirection.dy * player1.dashSpeed;
-                    
-                    player1.x += dx;
-                    player1.y += dy;
-                    
-                    player1.x = Math.max(0, Math.min(gameWidth - player1.width, player1.x));
-                    player1.y = Math.max(0, Math.min(gameHeight - player1.height, player1.y));
-                    
-                    if (Math.random() > 0.5) {
-                        createDashParticles(player1);
-                    }
+        mapCards.forEach(card => {
+            card.addEventListener('click', function() {
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
                 } else {
-                    player1.isDashing = false;
-                }
-            }
-            
-            if (keys.Numpad1 && player2.canDash && !player2.isDashing && 
-                currentTime - player2.lastDashTime > player2.dashCooldown) {
-                player2.isDashing = true;
-                player2.dashStartTime = currentTime;
-                player2.lastDashTime = currentTime;
-                createDashParticles(player2);
-            }
-            
-            if (player2.isDashing) {
-                if (currentTime - player2.dashStartTime < player2.dashDuration) {
-                    const dx = player2.lastDirection.dx * player2.dashSpeed;
-                    const dy = player2.lastDirection.dy * player2.dashSpeed;
-                    
-                    player2.x += dx;
-                    player2.y += dy;
-                    
-                    player2.x = Math.max(0, Math.min(gameWidth - player2.width, player2.x));
-                    player2.y = Math.max(0, Math.min(gameHeight - player2.height, player2.y));
-                    
-                    if (Math.random() > 0.5) {
-                        createDashParticles(player2);
-                    }
-                } else {
-                    player2.isDashing = false;
-                }
-            }
-            if (!player1.isDashing) {
-                if (keys.KeyW && player1.y > 0) {
-                    player1.y -= player1.speed;
-                    player1.lastDirection = { dx: 0, dy: -1 };
-                }
-                if (keys.KeyS && player1.y < gameHeight - player1.height) {
-                    player1.y += player1.speed;
-                    player1.lastDirection = { dx: 0, dy: 1 };
-                }
-                if (keys.KeyA && player1.x > 0) {
-                    player1.x -= player1.speed;
-                    player1.lastDirection = { dx: -1, dy: 0 };
-                }
-                if (keys.KeyD && player1.x < gameWidth - player1.width) {
-                    player1.x += player1.speed;
-                    player1.lastDirection = { dx: 1, dy: 0 };
-                }
-            }
-            if (!player2.isDashing) {
-                if (keys.ArrowUp && player2.y > 0) {
-                    player2.y -= player2.speed;
-                    player2.lastDirection = { dx: 0, dy: -1 };
-                }
-                if (keys.ArrowDown && player2.y < gameHeight - player2.height) {
-                    player2.y += player2.speed;
-                    player2.lastDirection = { dx: 0, dy: 1 };
-                }
-                if (keys.ArrowLeft && player2.x > 0) {
-                    player2.x -= player2.speed;
-                    player2.lastDirection = { dx: -1, dy: 0 };
-                }
-                if (keys.ArrowRight && player2.x < gameWidth - player2.width) {
-                    player2.x += player2.speed;
-                    player2.lastDirection = { dx: 1, dy: 0 };
-                }
-            }
-            checkPlayerCollision();
-            
-            if (keys.KeyC && currentTime - player1.lastFire > 500) {
-                createFireball(player1);
-                player1.lastFire = currentTime;
-            }
-            
-            if (keys.Numpad0 && currentTime - player2.lastFire > 500) {
-                createFireball(player2);
-                player2.lastFire = currentTime;
-            }
-            
-            for (let i = fireballs.length - 1; i >= 0; i--) {
-                const fb = fireballs[i];
-                fb.x += fb.dx;
-                fb.y += fb.dy;
-                
-                if (fb.x < 0 || fb.x > gameWidth || fb.y < 0 || fb.y > gameHeight) {
-                    fireballs.splice(i, 1);
-                    continue;
+                    mapCards.forEach(otherCard => {
+                        otherCard.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
                 }
                 
-                const targetPlayer = fb.player === player1 ? player2 : player1;
-                if (isColliding(fb, targetPlayer)) {
-                    targetPlayer.health -= 20;
-                    fireballs.splice(i, 1);
-                    resetGame(1);
-                    
-                }
-            }
-            for (let i = playerParticles.length - 1; i >= 0; i--) {
-                const p = playerParticles[i];
-                p.life--;
-                if (p.life <= 0) {
-                    playerParticles.splice(i, 1);
-                }
-            }
-        }
-        
-        function createFireball(player) {
-            if (player.lastDirection.dx === 0 && player.lastDirection.dy === 0) {
-                player.lastDirection = { dx: player === player1 ? 1 : -1, dy: 0 };
-            }
-            
-            fireballs.push({
-                x: player.x + player.width/2,
-                y: player.y + player.height/2,
-                radius: fireballRadius,
-                dx: player.lastDirection.dx * fireballSpeed,
-                dy: player.lastDirection.dy * fireballSpeed,
-                color: player === player1 ? '#00ccff' : '#ff6666',
-                player: player
+                updatePlayButtonState();
             });
-        }
+        });
         
-        function isColliding(fireball, player) {
-            return fireball.x > player.x && 
-                   fireball.x < player.x + player.width &&
-                   fireball.y > player.y && 
-                   fireball.y < player.y + player.height;
-        }
+        colorOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const player = this.getAttribute('data-player');
+                const color = this.getAttribute('data-color');
+                
+                document.querySelectorAll(`.color-option[data-player="${player}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                this.classList.add('selected');
+                
+                if (player === '1') {
+                    selectedPlayer1Color = color;
+                    player1Indicator.style.color = color;
+                } else {
+                    selectedPlayer2Color = color;
+                    player2Indicator.style.color = color;
+                }
+            });
+        });
         
-        function updateHealthBars() {
-            document.getElementById('health1').textContent = `${player1.health}%`;
-            document.getElementById('bar1').style.width = `${player1.health}%`;
-            document.getElementById('health2').textContent = `${player2.health}%`;
-            document.getElementById('bar2').style.width = `${player2.health}%`;
+        playButton.addEventListener('click', function() {
+            if (this.disabled) return;
             
-            if (player1.health <= 0 || player2.health <= 0) {
-                const winner = player1.health > player2.health ? "Joueur 1 (Bleu)" : "Joueur 2 (Rouge)";
+            const selectedMap = document.querySelector('.map-card.selected');
+            if (!selectedMap) {
+                notification.textContent = "Veuillez sélectionner une map !";
+                notification.classList.add('show', 'warning');
                 setTimeout(() => {
-                    alert(`${winner} a gagné !`);
-                    resetGame(0);
-                }, 100);
+                    notification.classList.remove('show');
+                }, 2000);
+                return;
             }
-        }
-        
-        function resetGame(nbr) {
-            player1.x = 150;
-            player1.y = gameHeight - 400;
-            if (nbr == 0)
-                player1.health = 100;
-            player1.lastDirection = { dx: 0, dy: 0 };
             
-            player2.x = gameWidth - 200;
-            player2.y = gameHeight - 400;
-            if (nbr == 0)
-                player2.health = 100;
-            player2.lastDirection = { dx: 0, dy: 0 };
-            fireballs.length = 0;
-            updateHealthBars();
-            for (let key in keys) {
-                keys[key] = false;
-            }
-        }
-        
-        function render() {
-            ctx.clearRect(0, 0, gameWidth, gameHeight);
-            playerParticles.forEach(p => {
-                ctx.globalAlpha = p.life / 30;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            ctx.globalAlpha = 1;
+            const mapName = selectedMap.querySelector('.map-name').textContent;
             
-            ctx.fillStyle = '#333';
-            ctx.fillRect(0, gameHeight - 20, gameWidth, 20);
+            notification.textContent = `Chargement de "${mapName}" en cours...`;
+            notification.classList.add('show');
+            notification.classList.remove('warning');
             
-            ctx.fillStyle = player1.color;
-            ctx.fillRect(player1.x, player1.y, player1.width, player1.height);
-            
-            ctx.fillStyle = player2.color;
-            ctx.fillRect(player2.x, player2.y, player2.width, player2.height);
-            
-            fireballs.forEach(fb => {
-                ctx.beginPath();
-                ctx.arc(fb.x, fb.y, fb.radius, 0, Math.PI * 2);
-                ctx.fillStyle = fb.color;
-                ctx.fill();
-            });
-            
-            drawDirectionIndicator(player1);
-            drawDirectionIndicator(player2);
-        }
-        
-        function drawDirectionIndicator(player) {
-            const indicatorLength = 50;
-            const centerX = player.x + player.width/2;
-            const centerY = player.y + player.height/2;
-            
-            if (player.lastDirection.dx !== 0 || player.lastDirection.dy !== 0) {
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.lineTo(
-                    centerX + player.lastDirection.dx * indicatorLength,
-                    centerY + player.lastDirection.dy * indicatorLength *1.25
-                );
-                ctx.strokeStyle = player === player1 ? '#00ccff' : '#ff6666';
-                ctx.lineWidth = 3;
-                ctx.stroke();
+            setTimeout(() => {
+                notification.textContent = `Lancement du jeu avec la map "${mapName}"!`;
                 
-                const arrowSize = 15;
-                const endX = centerX + player.lastDirection.dx * indicatorLength;
-                const endY = centerY + player.lastDirection.dy * indicatorLength*1.25;
-                
-                ctx.beginPath();
-                ctx.moveTo(endX, endY);
-                
-                if (player.lastDirection.dx !== 0) {
-                    ctx.lineTo(endX - player.lastDirection.dx * arrowSize, endY - arrowSize);
-                    ctx.lineTo(endX - player.lastDirection.dx * arrowSize, endY + arrowSize);
-                } else {
-                    ctx.lineTo(endX - arrowSize, endY - player.lastDirection.dy * arrowSize);
-                    ctx.lineTo(endX + arrowSize, endY - player.lastDirection.dy * arrowSize);
-                }
-                
-                ctx.closePath();
-                ctx.fillStyle = player === player1 ? '#00ccff' : '#ff6666';
-                ctx.fill();
-            }
-        }
+                setTimeout(() => {
+                    document.querySelector('.container').style.transform = 'scale(0.95)';
+                    document.querySelector('.container').style.opacity = '0.8';
+                    
+                    setTimeout(() => {
+                        const mapId = selectedMap.id;
+                        
+                        window.location.href = `game.html?map=${mapId}&player1Color=${encodeURIComponent(selectedPlayer1Color)}&player2Color=${encodeURIComponent(selectedPlayer2Color)}`;
+                    }, 800);
+                }, 1000);
+            }, 1500);
+        });
         
-        function gameLoop() {
-            createPlayerParticles(player1);
-            createPlayerParticles(player2);
-            update();
-            render();
-            requestAnimationFrame(gameLoop);
-        }
-        
-        createFireParticles();
-        updateHealthBars();
-        gameLoop();
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            document.body.style.backgroundPosition = 
+                `${x * 50}% ${y * 50}%`;
+        });
     </script>
 </body>
 </html>

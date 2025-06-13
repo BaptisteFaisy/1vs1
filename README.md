@@ -1,5 +1,4 @@
 TO DO :
 customisation:
--choix couleur particule
--choix maps (2, sans rien, avec deux mur + middle)
+-patch couleur particule et personnage,
 -choix time dash et bullet time et speed et vie. 
