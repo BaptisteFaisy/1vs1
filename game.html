@@ -196,18 +196,39 @@
                 const angle = Math.atan2(dy, dx);
                 const force = 10;
                 
-                const moveX = Math.cos(angle) * force;
-                const moveY = Math.sin(angle) * force;
+                // Sauvegarder les positions actuelles
+                const player1Orig = { x: player1.x, y: player1.y };
+                const player2Orig = { x: player2.x, y: player2.y };
                 
-                player1.x += moveX;
-                player1.y += moveY;
-                player2.x -= moveX;
-                player2.y -= moveY;
+                // Appliquer le déplacement
+                player1.x += Math.cos(angle) * force;
+                player1.y += Math.sin(angle) * force;
+                player2.x -= Math.cos(angle) * force;
+                player2.y -= Math.sin(angle) * force;
                 
-                player1.x = Math.max(0, Math.min(gameWidth - player1.width, player1.x));
-                player1.y = Math.max(0, Math.min(gameHeight - player1.height, player1.y));
-                player2.x = Math.max(0, Math.min(gameWidth - player2.width, player2.x));
-                player2.y = Math.max(0, Math.min(gameHeight - player2.height, player2.y));
+                // Vérifier les collisions avec les murs après déplacement
+                if (isCollidingWithWall(player1)) {
+                    player1.x = player1Orig.x;
+                    player1.y = player1Orig.y;
+                }
+                
+                if (isCollidingWithWall(player2)) {
+                    player2.x = player2Orig.x;
+                    player2.y = player2Orig.y;
+                }
+                
+                // Vérifier à nouveau la collision entre joueurs
+                const newDx = player1.x - player2.x;
+                const newDy = player1.y - player2.y;
+                const newDistance = Math.sqrt(newDx * newDx + newDy * newDy);
+                
+                // Si toujours en collision, annuler tous les déplacements
+                if (newDistance < minDistance) {
+                    player1.x = player1Orig.x;
+                    player1.y = player1Orig.y;
+                    player2.x = player2Orig.x;
+                    player2.y = player2Orig.y;
+                }
             }
         }
         
@@ -242,6 +263,12 @@
         }
         
         function isCollidingWithWall(object, isFireball = false) {
+            if (object.x < 0 || 
+                object.x + object.width > gameWidth ||
+                object.y < 0 || 
+                object.y + object.height > gameHeight) {
+                return true;
+            }
             for (const wall of walls) {
                 if (isFireball) {
                     let closestX = Math.max(wall.x, Math.min(object.x, wall.x + wall.width));
