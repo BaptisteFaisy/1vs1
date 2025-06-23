@@ -196,17 +196,14 @@
                 const angle = Math.atan2(dy, dx);
                 const force = 10;
                 
-                // Sauvegarder les positions actuelles
                 const player1Orig = { x: player1.x, y: player1.y };
                 const player2Orig = { x: player2.x, y: player2.y };
                 
-                // Appliquer le déplacement
                 player1.x += Math.cos(angle) * force;
                 player1.y += Math.sin(angle) * force;
                 player2.x -= Math.cos(angle) * force;
                 player2.y -= Math.sin(angle) * force;
                 
-                // Vérifier les collisions avec les murs après déplacement
                 if (isCollidingWithWall(player1)) {
                     player1.x = player1Orig.x;
                     player1.y = player1Orig.y;
@@ -217,12 +214,10 @@
                     player2.y = player2Orig.y;
                 }
                 
-                // Vérifier à nouveau la collision entre joueurs
                 const newDx = player1.x - player2.x;
                 const newDy = player1.y - player2.y;
                 const newDistance = Math.sqrt(newDx * newDx + newDy * newDy);
                 
-                // Si toujours en collision, annuler tous les déplacements
                 if (newDistance < minDistance) {
                     player1.x = player1Orig.x;
                     player1.y = player1Orig.y;
@@ -601,4 +596,4 @@
         gameLoop();
     </script>
 </body>
-</html>w
+</html>
